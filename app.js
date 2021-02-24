@@ -3,22 +3,23 @@ const path = require ('path');
 const express = require ('express');
 const bodyParser = require ('body-parser');
 
-const adminRoutes = require ('./routes/admin');
+const adminData = require ('./routes/admin');
 const shopRoutes = require ('./routes/shop');
 
 const app = express ();
 
-app.use (bodyParser.urlencoded ({extended: false}));
-<<<<<<< HEAD
-=======
-app.use (express.static (path.join (__dirname, 'public')));
->>>>>>> 51e5f841d1ba6dc90ffa2ca1df39f6eb8b905766
+app.set ('view engine', 'pug');
+app.set ('views', 'views');
 
-app.use ('/admin', adminRoutes);
+app.use (bodyParser.urlencoded ({extended: false}));
+
+app.use (express.static (path.join (__dirname, 'public')));
+
+app.use ('/admin', adminData.routes);
 app.use (shopRoutes);
 
 app.use ((req, res, next) => {
-  res.status (404).sendFile (path.join (__dirname, 'views', '404.html'));
+  res.status (404).render ('404', {pageTitle: '404 Not Found'});
 });
 
 app.listen (3000);
