@@ -13,18 +13,16 @@ exports.postAddProduct = (req, res) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description.trim ();
-  const product = new Product (
+  const product = new Product ({
     title,
     price,
     description,
     imageUrl,
-    null,
-    req.user._id
-  );
+    userId: req.user._id,
+  });
   product
     .save ()
     .then (result => {
-      console.log ('Created product');
       res.redirect ('/admin/products');
     })
     .catch (err => {
@@ -56,21 +54,19 @@ exports.getEditProduct = (req, res) => {
 exports.postEditProduct = (req, res) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
+  const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDescription = req.body.description.trim ();
-  const updatedPrice = req.body.price;
 
-  Product.findById (prodId);
-  const product = new Product (
-    updatedTitle,
-    updatedPrice,
-    updatedDescription,
-    updatedImageUrl,
-    prodId
-  )
-    .save ()
+  Product.findById (prodId)
+    .then (product => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDescription;
+      product.imageUrl = updatedImageUrl;
+      return product.save ();
+    })
     .then (result => {
-      console.log ('Updated product');
       res.redirect ('/admin/products');
     })
     .catch (err => console.log (err));
@@ -78,7 +74,7 @@ exports.postEditProduct = (req, res) => {
 
 exports.postDeleteProduct = (req, res) => {
   const prodId = req.body.productId;
-  Product.deleteById (prodId)
+  Product.findByIdAndRemove (prodId)
     .then (() => {
       console.log ('Deleted the product');
       res.redirect ('/admin/products');
@@ -87,7 +83,7 @@ exports.postDeleteProduct = (req, res) => {
 };
 
 exports.getProducts = (req, res) => {
-  Product.fetchAll ()
+  Product.find ()
     .then (products => {
       res.render ('admin/products', {
         prods: products,
