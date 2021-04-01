@@ -8,7 +8,6 @@ exports.getProducts = (req, res) => {
         prods: products,
         pageTitle: 'All Products',
         path: '/',
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch (err => {
@@ -24,7 +23,6 @@ exports.getProduct = (req, res) => {
         product: product,
         pageTitle: product.title,
         path: '/products',
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch (err => console.log (err));
@@ -40,7 +38,6 @@ exports.getCart = (req, res) => {
         products,
         pageTitle: 'You Cart',
         path: '/cart',
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch (err => console.log (err));
@@ -67,7 +64,6 @@ exports.getOrders = (req, res) => {
         orders,
         pageTitle: 'Your Orders',
         path: '/orders',
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch (err => console.log (err));
@@ -84,7 +80,7 @@ exports.postOrder = (req, res) => {
       const order = new Order ({
         products,
         user: {
-          name: req.user.name,
+          email: req.user.email,
           userId: req.user._id,
         },
       });
@@ -101,9 +97,9 @@ exports.postOrder = (req, res) => {
 
 exports.postCartDeleteProduct = (req, res) => {
   const prodId = req.body.productId;
-  req.user.user
+  req.user
     .removeFromCart (prodId)
-    .then (result => {
+    .then (() => {
       res.redirect ('/cart');
     })
     .catch (err => console.log (err));
@@ -116,7 +112,6 @@ exports.getIndex = (req, res) => {
         prods: products,
         pageTitle: 'Shop',
         path: '/',
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch (err => {
@@ -128,6 +123,5 @@ exports.getCheckout = (req, res) => {
   res.render ('shop/checkout', {
     pageTitle: 'Check out',
     path: '/checkout',
-    isAuthenticated: req.session.isLoggedIn,
   });
 };

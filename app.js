@@ -5,6 +5,8 @@ const bodyParser = require ('body-parser');
 const mongoose = require ('mongoose');
 const session = require ('express-session');
 const MongoDBStore = require ('connect-mongodb-session') (session);
+const csrf = require ('csurf');
+const flash = require ('connect-flash');
 
 const adminRoutes = require ('./routes/admin');
 const shopRoutes = require ('./routes/shop');
@@ -12,7 +14,6 @@ const authRoutes = require ('./routes/auth');
 
 const errorController = require ('./controllers/error');
 const User = require ('./models/user');
-const {nextTick} = require ('process');
 
 const MONGODB_URI =
   'mongodb+srv://dbUser:um42@d7.AytrJRe@shop-express.o5dku.mongodb.net/Shop?retryWrites=true&w=majority';
@@ -23,6 +24,8 @@ const store = new MongoDBStore ({
   uri: MONGODB_URI,
   collection: 'sessions',
 });
+
+const csrfProtection = csrf ();
 
 app.set ('view engine', 'ejs');
 app.set ('views', 'views');
@@ -37,6 +40,8 @@ app.use (
     saveUninitialized: false,
   })
 );
+app.use (csrfProtection);
+app.use (flash ());
 
 app.use ((req, res, next) => {
   if (!req.session.user) {
@@ -48,6 +53,12 @@ app.use ((req, res, next) => {
       next ();
     })
     .catch (err => console.log (err));
+});
+
+app.use ((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken ();
+  next ();
 });
 
 app.use ('/admin', adminRoutes);
@@ -62,18 +73,6 @@ mongoose
     useUnifiedTopology: true,
   })
   .then (result => {
-    User.findOne ().then (user => {
-      if (!user) {
-        const user = new User ({
-          name: 'Misha',
-          email: 'mixxow@gmail.com',
-          cart: {
-            items: [],
-          },
-        });
-        user.save ();
-      }
-    });
     console.log ('Listening on Port ', PORT);
     app.listen (PORT);
   })
