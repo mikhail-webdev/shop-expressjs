@@ -19,7 +19,6 @@ router.post (
       .isLength ({min: 5})
       .isAlphanumeric ()
       .withMessage ('The title should be at least 5 characthers'),
-    check ('imageUrl').trim ().isURL ().withMessage ('Please add a valid URL'),
     check ('price')
       .trim ()
       .isFloat ()
@@ -47,7 +46,6 @@ router.post (
       .isString ()
       .isLength ({min: 5})
       .withMessage ('The title should be at least 5 characthers'),
-    check ('imageUrl').trim ().isURL ().withMessage ('Please add a valid URL'),
     check ('price')
       .trim ()
       .isFloat ()
