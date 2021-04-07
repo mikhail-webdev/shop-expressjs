@@ -15,20 +15,18 @@ router.post (
   isAuth,
   [
     check ('title')
-      .trim ()
-      .isLength ({min: 5})
-      .isAlphanumeric ()
-      .withMessage ('The title should be at least 5 characthers'),
+      .isLength ({min: 3})
+      .withMessage ('The title should be at least 5 characthers')
+      .trim (),
     check ('price')
-      .trim ()
       .isFloat ()
       .withMessage ('Price should be a numeric value with cents'),
     check ('description')
-      .trim ()
       .isLength ({min: 10, max: 400})
       .withMessage (
         'The description should be at least 10 characters and maximum of 400 characters'
-      ),
+      )
+      .trim (),
   ],
   adminController.postAddProduct
 );
