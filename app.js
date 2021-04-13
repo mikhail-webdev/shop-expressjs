@@ -1,4 +1,6 @@
 const path = require ('path');
+const fs = require ('fs');
+// const https = require ('https');
 
 const express = require ('express');
 const mongoose = require ('mongoose');
@@ -7,6 +9,9 @@ const MongoDBStore = require ('connect-mongodb-session') (session);
 const csrf = require ('csurf');
 const flash = require ('connect-flash');
 const multer = require ('multer');
+const helmet = require ('helmet');
+const compression = require ('compression');
+const morgan = require ('morgan');
 
 const adminRoutes = require ('./routes/admin');
 const shopRoutes = require ('./routes/shop');
@@ -15,9 +20,7 @@ const authRoutes = require ('./routes/auth');
 const errorController = require ('./controllers/error');
 const User = require ('./models/user');
 
-const MONGODB_URI =
-  'mongodb+srv://dbUser:um42@d7.AytrJRe@shop-express.o5dku.mongodb.net/Shop?retryWrites=true&w=majority';
-const PORT = 3000;
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@shop-express.o5dku.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
 
 const app = express ();
 const store = new MongoDBStore ({
@@ -93,6 +96,15 @@ app.use ('/admin', adminRoutes);
 app.use (shopRoutes);
 app.use (authRoutes);
 
+const accessLogStream = fs.createWriteStream (
+  path.join (__dirname, 'access.log'),
+  {flags: 'a'}
+);
+
+app.use (helmet ());
+app.use (compression ());
+app.use (morgan ('combined', {stream: accessLogStream}));
+
 app.get ('/500', errorController.get500);
 
 app.use (errorController.get404);
@@ -111,7 +123,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then (() => {
-    console.log ('Listening on Port ', PORT);
-    app.listen (PORT);
+    console.log ('Listening on Port ', process.env.PORT);
+    app.listen (process.env.PORT || 3000);
   })
   .catch (err => console.log (err));
